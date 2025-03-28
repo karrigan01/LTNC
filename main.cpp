@@ -1,30 +1,50 @@
 #define SDL_MAIN_HANDLED
-#include<bits/stdc++.h>
+#include <bits/stdc++.h>
 #include <SDL.h>
 #include <SDL_mixer.h>
 #include <SDL_image.h>
+#include "grid.h"       // Grid
+#include "background.h" // Background
+#include "music_background.h" // Music
+
 using namespace std;
-bool grid[20][10];
-void add_background_music(){
-    Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) ;
-    Mix_Music* bgMusic = Mix_LoadMUS("background.mp3");
-    Mix_PlayMusic(bgMusic, -1);
-    bool music = true;
+
+const int SCREEN_WIDTH = 800;
+const int SCREEN_HEIGHT = 700;
+
+void initSDL(SDL_Window*& window, SDL_Renderer*& renderer) {
+    SDL_Init(SDL_INIT_VIDEO);
+    IMG_Init(IMG_INIT_PNG);
+
+    window = SDL_CreateWindow("Tetris", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+                              SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+}
+
+int main() {
+    SDL_Window* window = nullptr;
+    SDL_Renderer* renderer = nullptr;
+    initSDL(window, renderer);
+    SDL_Texture* bgTexture = loadBackground(renderer, "background.jpg");
+    playBackgroundMusic("background.mp3");
+    bool running = true;
     SDL_Event event;
-    while (music) {
+    while (running) {
         while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) { // Close window to stop music
-                music = false;
+            if (event.type == SDL_QUIT) {
+                running = false;
             }
         }
-        SDL_Delay(100);  // Prevent CPU overuse
+        SDL_RenderClear(renderer);
+        renderBackground(renderer, bgTexture);
+        drawGrid(renderer, 250, 50);
+        SDL_RenderPresent(renderer);
     }
-
-    // Cleanup
-    Mix_FreeMusic(bgMusic);
-    Mix_CloseAudio();
+    stopMusic();
+    SDL_DestroyTexture(bgTexture);
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    IMG_Quit();
     SDL_Quit();
-}
-int main() {
-    add_background_music();
+    return 0;
 }
