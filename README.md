@@ -1,2 +1,3 @@
 # LTNC
-Dang Nguyen Vu
+Dang Nguyen Vu 
+Game Tetris
