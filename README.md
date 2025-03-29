@@ -14,3 +14,5 @@ Normal Tetris with:
 -Current Score to see your current score
 
 -Max Score to save max score when you started to play
+
+-Win if you get more than 10000 points
