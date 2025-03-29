@@ -13,7 +13,7 @@ using namespace std;
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 700;
-const int DROP_SPEED = 500; // Tetromino drop delay in milliseconds
+int DROP_SPEED = 500; // Tetromino drop delay in milliseconds
 
 // Game grid (false = empty, true = occupied)
 bool grid[GRID_HEIGHT][GRID_WIDTH] = {false};
@@ -116,6 +116,17 @@ void renderGameover(SDL_Renderer* renderer, TTF_Font* font){
     SDL_RenderCopy(renderer, texture, NULL, &rect);
     SDL_DestroyTexture(texture);
 }
+void renderWin(SDL_Renderer* renderer, TTF_Font* font){
+    SDL_Color red = {255, 255, 0, 255}; // Yellow color
+    SDL_Surface* surface = TTF_RenderText_Solid(font, "You Win!", red);
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+
+    SDL_Rect rect = {SCREEN_WIDTH / 2 - surface->w / 2, SCREEN_HEIGHT / 2 - surface->h / 2, surface->w, surface->h};
+
+    SDL_FreeSurface(surface);
+    SDL_RenderCopy(renderer, texture, NULL, &rect);
+    SDL_DestroyTexture(texture);
+}
 int main() {
     SDL_Window* window = nullptr;
     SDL_Renderer* renderer = nullptr;
@@ -166,6 +177,12 @@ int main() {
                 clearFullLines();
                 currentTetromino = Tetromino(rand() % 8);
             }
+        }
+        if (scorre==1000){
+        renderWin(renderer,font);
+        SDL_RenderPresent(renderer);
+        SDL_Delay(3000);
+        break;
         }
         // Render everything
         SDL_RenderClear(renderer);
