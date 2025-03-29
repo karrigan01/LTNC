@@ -106,6 +106,17 @@ void renderScore(SDL_Renderer* renderer, TTF_Font* font, long long score) {
     SDL_RenderCopy(renderer, texture, NULL, &rect);
     SDL_DestroyTexture(texture);
 }
+void renderGameover(SDL_Renderer* renderer, TTF_Font* font){
+    SDL_Color red = {255, 0, 0, 255}; // Red color
+    SDL_Surface* surface = TTF_RenderText_Solid(font, "Game Over!", red);
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+
+    SDL_Rect rect = {SCREEN_WIDTH / 2 - surface->w / 2, SCREEN_HEIGHT / 2 - surface->h / 2, surface->w, surface->h};
+
+    SDL_FreeSurface(surface);
+    SDL_RenderCopy(renderer, texture, NULL, &rect);
+    SDL_DestroyTexture(texture);
+}
 int main() {
     SDL_Window* window = nullptr;
     SDL_Renderer* renderer = nullptr;
@@ -148,7 +159,9 @@ int main() {
             } else {
                 placeTetromino(currentTetromino);
                 if (!running){
-                cout<<"Game Over "<<scorre<<'\n';
+                renderGameover(renderer,font);
+                SDL_RenderPresent(renderer);
+                SDL_Delay(3000);
                 break;
                 }
                 clearFullLines();
