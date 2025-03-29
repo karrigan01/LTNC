@@ -8,19 +8,10 @@
 #include "background.h"
 #include "music_background.h"
 #include "tetromino.h"
+#include "system.h"
 
 using namespace std;
-
-const int SCREEN_WIDTH = 800;
-const int SCREEN_HEIGHT = 700;
-int DROP_SPEED = 500; // Tetromino drop delay in milliseconds
-
-// Game grid (false = empty, true = occupied)
-bool grid[GRID_HEIGHT][GRID_WIDTH] = {false};
-
-// Store colors of placed blocks
-SDL_Color gridColors[GRID_HEIGHT][GRID_WIDTH] = {};
-
+int DROP_SPEED = 500; // milliseconds
 // Draw placed blocks with stored colors
 void drawPlacedBlocks(SDL_Renderer* renderer) {
     for (int i = 0; i < GRID_HEIGHT; i++) {
@@ -35,7 +26,6 @@ void drawPlacedBlocks(SDL_Renderer* renderer) {
 }
 
 // Store Tetromino in grid when it lands
-bool running = true;
 void placeTetromino(Tetromino& tetromino) {
     SDL_Color color = tetromino.color;
 
@@ -54,7 +44,7 @@ void placeTetromino(Tetromino& tetromino) {
 }
 
 // Remove full lines and shift down
-long long scorre=0,maxscore=0;
+//long long scorre=0,maxscore=0;
 void clearFullLines() {
     for (int i = GRID_HEIGHT - 1; i >= 0; i--) {
         bool full = true;
@@ -87,7 +77,6 @@ void clearFullLines() {
         }
     }
 }
-
 void initSDL(SDL_Window*& window, SDL_Renderer*& renderer,TTF_Font* &font) {
     SDL_Init(SDL_INIT_VIDEO);
     IMG_Init(IMG_INIT_PNG);
@@ -96,75 +85,6 @@ void initSDL(SDL_Window*& window, SDL_Renderer*& renderer,TTF_Font* &font) {
     SDL_Color white = {255, 255, 255};
     window = SDL_CreateWindow("Tetris", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-}
-void renderScore(SDL_Renderer* renderer, TTF_Font* font, long long score) {
-    SDL_Color white = {255, 255, 255};
-    SDL_Surface* surface = TTF_RenderText_Solid(font, ("Score: " + to_string(score)).c_str(), white);
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_Rect rect = {20, 20, surface->w, surface->h};
-    SDL_FreeSurface(surface);
-    SDL_RenderCopy(renderer, texture, NULL, &rect);
-    SDL_DestroyTexture(texture);
-}
-void renderMaxScore(SDL_Renderer* renderer, TTF_Font* font, long long maxscore){
-    SDL_Color white = {255, 255, 255};
-    SDL_Surface* surface = TTF_RenderText_Solid(font, ("Max Score: " + to_string(maxscore)).c_str(), white);
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_Rect rect = {20, 40, surface->w, surface->h};
-    SDL_FreeSurface(surface);
-    SDL_RenderCopy(renderer, texture, NULL, &rect);
-    SDL_DestroyTexture(texture);
-}
-void renderGameover(SDL_Renderer* renderer, TTF_Font* font) {
-    SDL_Color red= {255, 0, 0};
-
-    // Render "Game Over"
-    SDL_Surface* surface1 = TTF_RenderText_Solid(font, "Game Over", red);
-    SDL_Texture* texture1 = SDL_CreateTextureFromSurface(renderer, surface1);
-    SDL_Rect rect1 = {SCREEN_WIDTH / 2 - surface1->w / 2, SCREEN_HEIGHT / 2 - 50, surface1->w, surface1->h};
-
-    // Render "Press R to Restart"
-    SDL_Surface* surface2 = TTF_RenderText_Solid(font, "Press R to Restart", red);
-    SDL_Texture* texture2 = SDL_CreateTextureFromSurface(renderer, surface2);
-    SDL_Rect rect2 = {SCREEN_WIDTH / 2 - surface2->w / 2, SCREEN_HEIGHT / 2, surface2->w, surface2->h};
-
-    // Render the text
-    SDL_RenderCopy(renderer, texture1, NULL, &rect1);
-    SDL_RenderCopy(renderer, texture2, NULL, &rect2);
-
-    // Free resources
-    SDL_FreeSurface(surface1);
-    SDL_DestroyTexture(texture1);
-    SDL_FreeSurface(surface2);
-    SDL_DestroyTexture(texture2);
-}
-
-void renderWin(SDL_Renderer* renderer, TTF_Font* font){
-    SDL_Color red = {255, 255, 0, 255}; // Yellow color
-    SDL_Surface* surface = TTF_RenderText_Solid(font, "You Win! \nPress R", red);
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
-
-    SDL_Rect rect = {SCREEN_WIDTH / 2 - surface->w / 2, SCREEN_HEIGHT / 2 - surface->h / 2, surface->w, surface->h};
-
-    SDL_FreeSurface(surface);
-    SDL_RenderCopy(renderer, texture, NULL, &rect);
-    SDL_DestroyTexture(texture);
-}
-void restartGame(Tetromino &currentTetromino, long long &score) {
-    // Clear the grid
-    running=true;
-    for (int i = 0; i < GRID_HEIGHT; i++) {
-        for (int j = 0; j < GRID_WIDTH; j++) {
-            grid[i][j] = false;
-            gridColors[i][j] = {0, 0, 0, 255}; // Reset to black
-        }
-    }
-
-    // Reset Tetromino
-    currentTetromino = Tetromino(rand() % 7);
-
-    // Reset score
-    score = 0;
 }
 bool showMenu(SDL_Renderer* renderer, TTF_Font* font, SDL_Texture* menuTexture) {
     bool inMenu = true;
@@ -197,6 +117,23 @@ bool showMenu(SDL_Renderer* renderer, TTF_Font* font, SDL_Texture* menuTexture) 
     }
     return true;
 }
+void renderNextTetromino(SDL_Renderer* renderer, Tetromino nextTetromino) {
+    int previewX = SCREEN_WIDTH - 200; // Adjust the position
+    int previewY = 100;
+
+    for (int i = 0; i < nextTetromino.shape.size(); i++) {
+        for (int j = 0; j < nextTetromino.shape[i].size(); j++) {
+            if (nextTetromino.shape[i][j]) {
+                SDL_Color color = nextTetromino.color; // Ensure color is used
+                SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, 255);
+
+                SDL_Rect block = {previewX + j * BLOCK_SIZE, previewY + i * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE};
+                SDL_RenderFillRect(renderer, &block);
+            }
+        }
+    }
+}
+
 int main() {
     SDL_Window* window = nullptr;
     SDL_Renderer* renderer = nullptr;
@@ -214,7 +151,8 @@ int main() {
     }
     SDL_DestroyTexture(menuTexture);
     SDL_Texture* bgTexture = loadBackground(renderer, "background.jpg");
-    Tetromino currentTetromino(rand() % 7);
+    Tetromino currentTetromino(rng() % 7);
+    Tetromino nextTetromino(rng() % 7);
     SDL_Event event;
     Uint32 lastDropTime = SDL_GetTicks();
 
@@ -268,7 +206,8 @@ int main() {
                 }
                 }
                 clearFullLines();
-                currentTetromino = Tetromino(rand() % 7);
+                currentTetromino = nextTetromino;
+                nextTetromino = Tetromino(rng() % 7);
             }
         }
         if (scorre>=10000){
@@ -286,7 +225,8 @@ int main() {
         drawPlacedBlocks(renderer);
         drawTetromino(renderer, currentTetromino);
         renderScore(renderer, font, scorre);
-        renderMaxScore(renderer,font,maxscore);
+        renderMaxScore(renderer, font, maxscore);
+        renderNextTetromino(renderer, nextTetromino); // Move this here, after clearing
         SDL_RenderPresent(renderer);
     }
 
