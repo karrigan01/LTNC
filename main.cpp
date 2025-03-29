@@ -35,6 +35,7 @@ void drawPlacedBlocks(SDL_Renderer* renderer) {
 }
 
 // Store Tetromino in grid when it lands
+bool running = true;
 void placeTetromino(Tetromino& tetromino) {
     SDL_Color colors[] = { {255, 0, 0}, {0, 255, 0}, {0, 0, 255}, {255, 255, 0}, {255, 165, 0}, {128, 0, 128}, {0, 255, 255} };
     SDL_Color color = colors[rand() % 7];
@@ -42,6 +43,10 @@ void placeTetromino(Tetromino& tetromino) {
     for (int i = 0; i < tetromino.shape.size(); i++) {
         for (int j = 0; j < tetromino.shape[i].size(); j++) {
             if (tetromino.shape[i][j]) {
+                if (tetromino.y + i>=GRID_HEIGHT||tetromino.x + j>=GRID_WIDTH||grid[tetromino.y + i][tetromino.x + j]){
+                    running=false;
+                    return;
+                }
                 grid[tetromino.y + i][tetromino.x + j] = true;
                 gridColors[tetromino.y + i][tetromino.x + j] = color;
             }
@@ -50,7 +55,7 @@ void placeTetromino(Tetromino& tetromino) {
 }
 
 // Remove full lines and shift down
-long long score=0;
+long long scorre=0;
 void clearFullLines() {
     for (int i = GRID_HEIGHT - 1; i >= 0; i--) {
         bool full = true;
@@ -62,7 +67,7 @@ void clearFullLines() {
         }
 
         if (full) {
-            score+=100;
+            scorre+=100;
             // Move all rows above down
             for (int k = i; k > 0; k--) {
                 for (int j = 0; j < GRID_WIDTH; j++) {
@@ -83,24 +88,33 @@ void clearFullLines() {
     }
 }
 
-void initSDL(SDL_Window*& window, SDL_Renderer*& renderer) {
+void initSDL(SDL_Window*& window, SDL_Renderer*& renderer,TTF_Font* &font) {
     SDL_Init(SDL_INIT_VIDEO);
     IMG_Init(IMG_INIT_PNG);
     TTF_Init();
-    window = SDL_CreateWindow("Tetris", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                              SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+    font = TTF_OpenFont("arial.ttf", 24); // Ensure the file exists
+    SDL_Color white = {255, 255, 255};
+    window = SDL_CreateWindow("Tetris", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 }
-
+void renderScore(SDL_Renderer* renderer, TTF_Font* font, long long score) {
+    SDL_Color white = {255, 255, 255};
+    SDL_Surface* surface = TTF_RenderText_Solid(font, ("Score: " + to_string(score)).c_str(), white);
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+    SDL_Rect rect = {20, 20, surface->w, surface->h};
+    SDL_FreeSurface(surface);
+    SDL_RenderCopy(renderer, texture, NULL, &rect);
+    SDL_DestroyTexture(texture);
+}
 int main() {
     SDL_Window* window = nullptr;
     SDL_Renderer* renderer = nullptr;
-    initSDL(window, renderer);
+    TTF_Font* font= nullptr;
+    initSDL(window, renderer,font);
     SDL_Texture* bgTexture = loadBackground(renderer, "background.jpg");
     playBackgroundMusic("background.mp3");
 
-    Tetromino currentTetromino(rand() % 7);
-    bool running = true;
+    Tetromino currentTetromino(rand() % 8);
     SDL_Event event;
     Uint32 lastDropTime = SDL_GetTicks();
 
@@ -133,17 +147,21 @@ int main() {
                 lastDropTime = SDL_GetTicks();
             } else {
                 placeTetromino(currentTetromino);
+                if (!running){
+                cout<<"Game Over "<<scorre<<'\n';
+                break;
+                }
                 clearFullLines();
-                currentTetromino = Tetromino(rand() % 7);
+                currentTetromino = Tetromino(rand() % 8);
             }
         }
-
         // Render everything
         SDL_RenderClear(renderer);
         renderBackground(renderer, bgTexture);
         drawGrid(renderer, 250, 50);
         drawPlacedBlocks(renderer);
         drawTetromino(renderer, currentTetromino);
+        renderScore(renderer, font, scorre);
         SDL_RenderPresent(renderer);
     }
 
@@ -153,6 +171,8 @@ int main() {
     SDL_DestroyWindow(window);
     IMG_Quit();
     SDL_Quit();
-    cout<<score<<'\n';
+    TTF_CloseFont(font);
+    TTF_Quit();
+    //cout<<score<<'\n';
     return 0;
 }
