@@ -70,7 +70,7 @@ void clearFullLines() {
             // Clear the top row
             for (int j = 0; j < GRID_WIDTH; j++) {
                 grid[0][j] = false;
-                gridColors[0][j] = {255,255,255, 255}; // Default white
+                gridColors[0][j] = {255,255,255, 255}; // white
             }
 
             // Recheck this row
@@ -82,19 +82,19 @@ void initSDL(SDL_Window*& window, SDL_Renderer*& renderer,TTF_Font* &font) {
     SDL_Init(SDL_INIT_VIDEO);
     IMG_Init(IMG_INIT_PNG);
     TTF_Init();
-    font = TTF_OpenFont("arial.ttf", 24); // Ensure the file exists
+    font = TTF_OpenFont("arial.ttf", 24);
     SDL_Color white = {255, 255, 255};
     window = SDL_CreateWindow("Tetris", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 }
 void renderNextTetromino(SDL_Renderer* renderer, Tetromino nextTetromino) {
-    int previewX = SCREEN_WIDTH - 200; // Adjust the position
+    int previewX = SCREEN_WIDTH - 200;
     int previewY = 100;
 
     for (int i = 0; i < nextTetromino.shape.size(); i++) {
         for (int j = 0; j < nextTetromino.shape[i].size(); j++) {
             if (nextTetromino.shape[i][j]) {
-                SDL_Color color = nextTetromino.color; // Ensure color is used
+                SDL_Color color = nextTetromino.color;
                 SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, 255);
 
                 SDL_Rect block = {previewX + j * BLOCK_SIZE, previewY + i * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE};
@@ -117,7 +117,7 @@ int main() {
         return 1;
     }
     if (!showMenu(renderer, font,menuTexture)) {
-        return 0; // Exit if user quits from menu
+        return 0;
     }
     SDL_DestroyTexture(menuTexture);
     SDL_Texture* bgTexture = loadBackground(renderer, "background.jpg");
@@ -127,7 +127,6 @@ int main() {
     Uint32 lastDropTime = SDL_GetTicks();
 
     while (running) {
-        // Handle events
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
                 running = false;
@@ -170,7 +169,7 @@ int main() {
                     waiting = false;
                     }
                     else if (event.type == SDL_QUIT) {
-                    return 0;  // Exit if the user closes the window
+                    return 0;
                     }
                     }
                 }
@@ -196,7 +195,7 @@ int main() {
         drawTetromino(renderer, currentTetromino);
         renderScore(renderer, font, scorre);
         renderMaxScore(renderer, font, maxscore);
-        renderNextTetromino(renderer, nextTetromino); // Move this here, after clearing
+        renderNextTetromino(renderer, nextTetromino);
         SDL_RenderPresent(renderer);
     }
 
