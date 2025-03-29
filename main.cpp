@@ -37,8 +37,7 @@ void drawPlacedBlocks(SDL_Renderer* renderer) {
 // Store Tetromino in grid when it lands
 bool running = true;
 void placeTetromino(Tetromino& tetromino) {
-    SDL_Color colors[] = { {255, 0, 0}, {0, 255, 0}, {0, 0, 255}, {255, 255, 0}, {255, 165, 0}, {128, 0, 128}, {0, 255, 255} };
-    SDL_Color color = colors[rand() % 7];
+    SDL_Color color = tetromino.color;
 
     for (int i = 0; i < tetromino.shape.size(); i++) {
         for (int j = 0; j < tetromino.shape[i].size(); j++) {
@@ -79,7 +78,7 @@ void clearFullLines() {
             // Clear the top row
             for (int j = 0; j < GRID_WIDTH; j++) {
                 grid[0][j] = false;
-                gridColors[0][j] = {0, 0, 0, 255}; // Default black
+                gridColors[0][j] = {255,255,255, 255}; // Default white
             }
 
             // Recheck this row
