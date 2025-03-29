@@ -54,7 +54,7 @@ void placeTetromino(Tetromino& tetromino) {
 }
 
 // Remove full lines and shift down
-long long scorre=0;
+long long scorre=0,maxscore=0;
 void clearFullLines() {
     for (int i = GRID_HEIGHT - 1; i >= 0; i--) {
         bool full = true;
@@ -67,6 +67,7 @@ void clearFullLines() {
 
         if (full) {
             scorre+=100;
+            maxscore=max(maxscore,scorre);
             // Move all rows above down
             for (int k = i; k > 0; k--) {
                 for (int j = 0; j < GRID_WIDTH; j++) {
@@ -105,6 +106,15 @@ void renderScore(SDL_Renderer* renderer, TTF_Font* font, long long score) {
     SDL_RenderCopy(renderer, texture, NULL, &rect);
     SDL_DestroyTexture(texture);
 }
+void renderMaxScore(SDL_Renderer* renderer, TTF_Font* font, long long maxscore){
+    SDL_Color white = {255, 255, 255};
+    SDL_Surface* surface = TTF_RenderText_Solid(font, ("Max Score: " + to_string(maxscore)).c_str(), white);
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+    SDL_Rect rect = {20, 40, surface->w, surface->h};
+    SDL_FreeSurface(surface);
+    SDL_RenderCopy(renderer, texture, NULL, &rect);
+    SDL_DestroyTexture(texture);
+}
 void renderGameover(SDL_Renderer* renderer, TTF_Font* font){
     SDL_Color red = {255, 0, 0, 255}; // Red color
     SDL_Surface* surface = TTF_RenderText_Solid(font, "Game Over!", red);
@@ -127,6 +137,23 @@ void renderWin(SDL_Renderer* renderer, TTF_Font* font){
     SDL_RenderCopy(renderer, texture, NULL, &rect);
     SDL_DestroyTexture(texture);
 }
+void restartGame(Tetromino &currentTetromino, long long &score) {
+    // Clear the grid
+    running=true;
+    for (int i = 0; i < GRID_HEIGHT; i++) {
+        for (int j = 0; j < GRID_WIDTH; j++) {
+            grid[i][j] = false;
+            gridColors[i][j] = {0, 0, 0, 255}; // Reset to black
+        }
+    }
+
+    // Reset Tetromino
+    currentTetromino = Tetromino(rand() % 7);
+
+    // Reset score
+    score = 0;
+}
+
 int main() {
     SDL_Window* window = nullptr;
     SDL_Renderer* renderer = nullptr;
@@ -160,6 +187,9 @@ int main() {
                         break;
                 }
             }
+            else if (event.key.keysym.sym == SDLK_r) {
+            restartGame(currentTetromino, scorre);
+            }
         }
 
         // Move Tetromino down automatically
@@ -171,20 +201,27 @@ int main() {
                 if (!running){
                 renderGameover(renderer,font);
                 SDL_RenderPresent(renderer);
-                SDL_Delay(3000);
-                break;
+                SDL_Delay(1000);
+                bool waiting=true;
+                while (waiting){
+                    while (SDL_PollEvent(&event)){
+                    if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_r) {
+                    restartGame(currentTetromino, scorre);
+                    waiting = false;
+                    }
+                    else if (event.type == SDL_QUIT) {
+                    return 0;  // Exit if the user closes the window
+                    }
+                    }
+                }
                 }
                 clearFullLines();
                 currentTetromino = Tetromino(rand() % 7);
             }
         }
-        if (scorre>=200){
-        SDL_RenderClear(renderer);
-        renderBackground(renderer, bgTexture);
-        drawGrid(renderer, 250, 50);
-        drawPlacedBlocks(renderer);
-        drawTetromino(renderer, currentTetromino);
+        if (scorre>=10000){
         renderScore(renderer, font, scorre);
+        renderMaxScore(renderer,font,maxscore);
         renderWin(renderer,font);
         SDL_RenderPresent(renderer);
         SDL_Delay(3000);
@@ -197,6 +234,7 @@ int main() {
         drawPlacedBlocks(renderer);
         drawTetromino(renderer, currentTetromino);
         renderScore(renderer, font, scorre);
+        renderMaxScore(renderer,font,maxscore);
         SDL_RenderPresent(renderer);
     }
 
