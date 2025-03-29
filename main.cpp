@@ -135,7 +135,7 @@ int main() {
     SDL_Texture* bgTexture = loadBackground(renderer, "background.jpg");
     playBackgroundMusic("background.mp3");
 
-    Tetromino currentTetromino(rand() % 8);
+    Tetromino currentTetromino(rand() % 7);
     SDL_Event event;
     Uint32 lastDropTime = SDL_GetTicks();
 
@@ -175,10 +175,16 @@ int main() {
                 break;
                 }
                 clearFullLines();
-                currentTetromino = Tetromino(rand() % 8);
+                currentTetromino = Tetromino(rand() % 7);
             }
         }
-        if (scorre==1000){
+        if (scorre>=200){
+        SDL_RenderClear(renderer);
+        renderBackground(renderer, bgTexture);
+        drawGrid(renderer, 250, 50);
+        drawPlacedBlocks(renderer);
+        drawTetromino(renderer, currentTetromino);
+        renderScore(renderer, font, scorre);
         renderWin(renderer,font);
         SDL_RenderPresent(renderer);
         SDL_Delay(3000);
