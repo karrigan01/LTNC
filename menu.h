@@ -1,35 +1,55 @@
 #ifndef MENU_H_INCLUDED
 #define MENU_H_INCLUDED
 
-#include <bits/stdc++.h>
 #include <SDL.h>
+#include <SDL_ttf.h>
+#include <string>
+#include "setting.h"
 
+// Menu function
 bool showMenu(SDL_Renderer* renderer, TTF_Font* font, SDL_Texture* menuTexture) {
     bool inMenu = true;
     SDL_Event event;
 
+    // Define buttons
+    Button startButton = {{300, 300, 200, 50}, {0, 128, 255, 255}, "Start"};
+    Button settingsButton = {{300, 400, 200, 50}, {128, 128, 128, 255}, "Settings"};
+
     while (inMenu) {
-        // Render the menu background image
         SDL_RenderCopy(renderer, menuTexture, NULL, NULL);
 
-        // Render text
-        SDL_Color white = {255, 255, 255};
-        SDL_Surface* surface = TTF_RenderText_Solid(font, "Press ENTER to Start", white);
-        SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, surface);
-        SDL_Rect textRect = {SCREEN_WIDTH / 2 - surface->w / 2, SCREEN_HEIGHT / 2 - surface->h / 2, surface->w, surface->h};
+        // Render "TETRIS" Logo
+        TTF_Font* fontt = TTF_OpenFont("Arial Bold.ttf", 72);//Make logo bigger
+        SDL_Color yellow = {255, 255, 0}; // Yellow for classic Tetris look
+        SDL_Surface* logoSurface = TTF_RenderText_Solid(fontt, "TETRIS", yellow);
+        SDL_Texture* logoTexture = SDL_CreateTextureFromSurface(renderer, logoSurface);
+        SDL_Rect logoRect = {270, 200, logoSurface->w, logoSurface->h};
 
-        SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
+        SDL_RenderCopy(renderer, logoTexture, NULL, &logoRect);
+        SDL_FreeSurface(logoSurface);
+        SDL_DestroyTexture(logoTexture);
 
-        SDL_FreeSurface(surface);
-        SDL_DestroyTexture(textTexture);
+        // Render buttons
+        renderButton(renderer, font, startButton);
+        renderButton(renderer, font, settingsButton);
 
         SDL_RenderPresent(renderer);
 
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
                 return false; // Exit game
-            } else if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_RETURN) {
-                inMenu = false; // Start game
+            }
+            else if (event.type == SDL_MOUSEBUTTONDOWN) {
+                int x, y;
+                SDL_GetMouseState(&x, &y);
+                if (isButtonClicked(startButton, x, y)) {
+                    inMenu = false; // Start game
+                }
+                if (isButtonClicked(settingsButton, x, y)) {
+                    // Open settings (implement later)
+                    showSettings(renderer,font);
+
+                }
             }
         }
     }
