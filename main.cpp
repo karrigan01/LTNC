@@ -12,7 +12,6 @@
 #include "menu.h"
 
 using namespace std;
-int DROP_SPEED = 500; // milliseconds
 // Draw placed blocks with stored colors
 void drawPlacedBlocks(SDL_Renderer* renderer) {
     for (int i = 0; i < GRID_HEIGHT; i++) {
