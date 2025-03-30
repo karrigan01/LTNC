@@ -153,12 +153,12 @@ int main() {
                 lastDropTime = SDL_GetTicks();
             } else {
                 placeTetromino(currentTetromino);
-                if (!running){
+                if (!running){//game over
                 renderGameover(renderer,font);
                 SDL_RenderPresent(renderer);
                 SDL_Delay(1000);
                 bool waiting=true;
-                while (waiting){
+                while (waiting){//wait for the player want to play again or not
                     while (SDL_PollEvent(&event)){
                     if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_r) {
                     restartGame(currentTetromino, scorre);
@@ -175,7 +175,7 @@ int main() {
                 nextTetromino = Tetromino(rng() % 7);
             }
         }
-        if (scorre>=10000){
+        if (scorre>=10000){ //checking win game
         renderScore(renderer, font, scorre);
         renderMaxScore(renderer,font,maxscore);
         renderWin(renderer,font);
@@ -183,7 +183,7 @@ int main() {
         SDL_Delay(3000);
         break;
         }
-
+        //render everything
         SDL_RenderClear(renderer);
         renderBackground(renderer, bgTexture);
         drawGrid(renderer, 250, 50);
@@ -194,7 +194,7 @@ int main() {
         renderNextTetromino(renderer, nextTetromino);
         SDL_RenderPresent(renderer);
     }
-
+    //clear
     stopMusic();
     SDL_DestroyTexture(bgTexture);
     SDL_DestroyRenderer(renderer);
