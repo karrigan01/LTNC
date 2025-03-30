@@ -34,21 +34,17 @@ void renderMaxScore(SDL_Renderer* renderer, TTF_Font* font, long long maxscore){
 void renderGameover(SDL_Renderer* renderer, TTF_Font* font) {
     SDL_Color red= {255, 0, 0};
 
-    // Render "Game Over"
     SDL_Surface* surface1 = TTF_RenderText_Solid(font, "Game Over", red);
     SDL_Texture* texture1 = SDL_CreateTextureFromSurface(renderer, surface1);
     SDL_Rect rect1 = {SCREEN_WIDTH / 2 - surface1->w / 2, SCREEN_HEIGHT / 2 - 50, surface1->w, surface1->h};
 
-    // Render "Press R to Restart"
     SDL_Surface* surface2 = TTF_RenderText_Solid(font, "Press R to Restart", red);
     SDL_Texture* texture2 = SDL_CreateTextureFromSurface(renderer, surface2);
     SDL_Rect rect2 = {SCREEN_WIDTH / 2 - surface2->w / 2, SCREEN_HEIGHT / 2, surface2->w, surface2->h};
 
-    // Render the text
     SDL_RenderCopy(renderer, texture1, NULL, &rect1);
     SDL_RenderCopy(renderer, texture2, NULL, &rect2);
 
-    // Free resources
     SDL_FreeSurface(surface1);
     SDL_DestroyTexture(texture1);
     SDL_FreeSurface(surface2);
@@ -67,7 +63,6 @@ void renderWin(SDL_Renderer* renderer, TTF_Font* font){
     SDL_DestroyTexture(texture);
 }
 void restartGame(Tetromino &currentTetromino, long long &score) {
-    // Clear the grid
     running=true;
     for (int i = 0; i < GRID_HEIGHT; i++) {
         for (int j = 0; j < GRID_WIDTH; j++) {
@@ -75,11 +70,7 @@ void restartGame(Tetromino &currentTetromino, long long &score) {
             gridColors[i][j] = {0, 0, 0, 255}; // Reset to black
         }
     }
-
-    // Reset Tetromino
     currentTetromino = Tetromino(rng() % 7);
-
-    // Reset score
     score = 0;
 }
 
