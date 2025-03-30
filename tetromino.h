@@ -8,7 +8,7 @@ using namespace std;
 
 const int GRID_WIDTH = 10;
 const int GRID_HEIGHT = 20;
-const int BLOCK_SIZE = 30;  // Size of each block in pixels
+const int BLOCK_SIZE = 30;
 SDL_Color colors[] = {
     {255, 0, 0, 255},   // Red for shape 0
     {0, 255, 0, 255},   // Green for shape 1
@@ -64,17 +64,13 @@ struct Tetromino {
     void moveLeft(bool grid[GRID_HEIGHT][GRID_WIDTH]) {
         if (isValidPosition(x - 1, y, shape, grid)) {
             x--;
-            //return true;
         }
-        //return false;
     }
 
     void moveRight(bool grid[GRID_HEIGHT][GRID_WIDTH]) {
         if (isValidPosition(x + 1, y, shape, grid)) {
             x++;
-            //return true;
         }
-        //return false;
     }
 
     bool moveDown(bool grid[GRID_HEIGHT][GRID_WIDTH]) {
@@ -97,9 +93,7 @@ struct Tetromino {
 
         if (isValidPosition(x, y, rotated, grid)) {
             shape = rotated;
-            //return true;
         }
-        //return false;
     }
 
     // Lock Tetromino into grid when it can't move down
