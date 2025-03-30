@@ -18,9 +18,8 @@ bool showMenu(SDL_Renderer* renderer, TTF_Font* font, SDL_Texture* menuTexture) 
     while (inMenu) {
         SDL_RenderCopy(renderer, menuTexture, NULL, NULL);
 
-        // Render "TETRIS" Logo
         TTF_Font* fontt = TTF_OpenFont("Arial Bold.ttf", 72);//Make logo bigger
-        SDL_Color yellow = {255, 255, 0}; // Yellow for classic Tetris look
+        SDL_Color yellow = {255, 255, 0}; // Yellow
         SDL_Surface* logoSurface = TTF_RenderText_Solid(fontt, "TETRIS", yellow);
         SDL_Texture* logoTexture = SDL_CreateTextureFromSurface(renderer, logoSurface);
         SDL_Rect logoRect = {270, 200, logoSurface->w, logoSurface->h};
@@ -29,7 +28,6 @@ bool showMenu(SDL_Renderer* renderer, TTF_Font* font, SDL_Texture* menuTexture) 
         SDL_FreeSurface(logoSurface);
         SDL_DestroyTexture(logoTexture);
 
-        // Render buttons
         renderButton(renderer, font, startButton);
         renderButton(renderer, font, settingsButton);
 
@@ -37,7 +35,7 @@ bool showMenu(SDL_Renderer* renderer, TTF_Font* font, SDL_Texture* menuTexture) 
 
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
-                return false; // Exit game
+                return false;
             }
             else if (event.type == SDL_MOUSEBUTTONDOWN) {
                 int x, y;
@@ -46,7 +44,6 @@ bool showMenu(SDL_Renderer* renderer, TTF_Font* font, SDL_Texture* menuTexture) 
                     inMenu = false; // Start game
                 }
                 if (isButtonClicked(settingsButton, x, y)) {
-                    // Open settings (implement later)
                     showSettings(renderer,font);
 
                 }
