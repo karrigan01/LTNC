@@ -3,7 +3,7 @@
 
 #include <SDL.h>
 #include <SDL_ttf.h>
-
+int DROP_SPEED = 500; // milliseconds
 // Button structure
 struct Button {
     SDL_Rect rect;
@@ -36,7 +36,17 @@ bool isButtonClicked(Button button, int mouseX, int mouseY) {
     return (mouseX >= button.rect.x && mouseX <= button.rect.x + button.rect.w &&
             mouseY >= button.rect.y && mouseY <= button.rect.y + button.rect.h);
 }
-int DROP_SPEED = 500; // milliseconds
+string difficulty[501];
+void renderLevel(SDL_Renderer* renderer, TTF_Font* font){
+    difficulty[200]="HARD", difficulty[400]="MEDIUM", difficulty[500]="EASY";
+    SDL_Color white = {255, 255, 255};
+    SDL_Surface* surface = TTF_RenderText_Solid(font, ("Level: " + difficulty[DROP_SPEED]).c_str(), white);
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+    SDL_Rect rect = {20, 45, surface->w, surface->h};
+    SDL_FreeSurface(surface);
+    SDL_RenderCopy(renderer, texture, NULL, &rect);
+    SDL_DestroyTexture(texture);
+}
 void showSettings(SDL_Renderer* renderer, TTF_Font* font) {
     bool inSettings = true;
     SDL_Event event;
@@ -59,6 +69,7 @@ void showSettings(SDL_Renderer* renderer, TTF_Font* font) {
         SDL_DestroyTexture(texture);
 
         // Render difficulty buttons
+        renderLevel(renderer,font);
         renderButton(renderer, font, easyButton);
         renderButton(renderer, font, mediumButton);
         renderButton(renderer, font, hardButton);
