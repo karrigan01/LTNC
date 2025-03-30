@@ -10,14 +10,13 @@ const int GRID_WIDTH = 10;
 const int GRID_HEIGHT = 20;
 const int BLOCK_SIZE = 30;
 SDL_Color colors[] = {
-    {255, 0, 0, 255},   // Red for shape 0
-    {0, 255, 0, 255},   // Green for shape 1
-    {0, 0, 255, 255},   // Blue for shape 2
-    {255, 255, 0, 255}, // Yellow for shape 3
-    {255, 165, 0, 255}, // Orange for shape 4
-    {128, 0, 128, 255}, // Purple for shape 5
-    {0, 255, 255, 255}, // Cyan for shape 6
-    {192, 192, 192, 255} // Gray for shape 7
+    {255, 0, 0, 255},   // Red for shape I
+    {0, 255, 0, 255},   // Green for shape O
+    {0, 0, 255, 255},   // Blue for shape S
+    {255, 255, 0, 255}, // Yellow for shape Z
+    {255, 165, 0, 255}, // Orange for shape T
+    {128, 0, 128, 255}, // Purple for shape L
+    {0, 255, 255, 255}, // Cyan for shape J
 };
 // Tetromino shapes
 vector<vector<vector<int>>> tetrominoShapes = {
@@ -28,7 +27,6 @@ vector<vector<vector<int>>> tetrominoShapes = {
     {{1, 1, 1}, {0, 1, 0}}, // T
     {{1, 1, 1}, {1, 0, 0}}, // L
     {{1, 1, 1}, {0, 0, 1}},  // J
-    {{1, 1, 1}, {0, 0, 1}} //reverse L
 };
 
 struct Tetromino {
