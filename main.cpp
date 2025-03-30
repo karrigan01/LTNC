@@ -44,7 +44,6 @@ void placeTetromino(Tetromino& tetromino) {
 }
 
 // Remove full lines and shift down
-//long long scorre=0,maxscore=0;
 void clearFullLines() {
     for (int i = GRID_HEIGHT - 1; i >= 0; i--) {
         bool full = true;
@@ -58,7 +57,7 @@ void clearFullLines() {
         if (full) {
             scorre+=100;
             maxscore=max(maxscore,scorre);
-            // Move all rows above down
+
             for (int k = i; k > 0; k--) {
                 for (int j = 0; j < GRID_WIDTH; j++) {
                     grid[k][j] = grid[k - 1][j];
@@ -66,13 +65,11 @@ void clearFullLines() {
                 }
             }
 
-            // Clear the top row
             for (int j = 0; j < GRID_WIDTH; j++) {
                 grid[0][j] = false;
                 gridColors[0][j] = {255,255,255, 255}; // white
             }
 
-            // Recheck this row
             i++;
         }
     }
@@ -109,7 +106,7 @@ int main() {
     TTF_Font* font= nullptr;
     initSDL(window, renderer,font);
     playBackgroundMusic("background.mp3");
-    // Load menu background image
+
     SDL_Texture* menuTexture = loadBackground(renderer, "background.jpg");
     if (!menuTexture) {
         cout << "Failed to load menu image!" << endl;
@@ -186,7 +183,7 @@ int main() {
         SDL_Delay(3000);
         break;
         }
-        // Render everything
+
         SDL_RenderClear(renderer);
         renderBackground(renderer, bgTexture);
         drawGrid(renderer, 250, 50);
@@ -206,6 +203,5 @@ int main() {
     SDL_Quit();
     TTF_CloseFont(font);
     TTF_Quit();
-    //cout<<score<<'\n';
     return 0;
 }
