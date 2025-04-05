@@ -12,7 +12,6 @@
 #include "menu.h"
 
 using namespace std;
-// Draw placed blocks with stored colors
 void drawPlacedBlocks(SDL_Renderer* renderer) {
     for (int i = 0; i < GRID_HEIGHT; i++) {
         for (int j = 0; j < GRID_WIDTH; j++) {
@@ -25,7 +24,6 @@ void drawPlacedBlocks(SDL_Renderer* renderer) {
     }
 }
 
-// Store Tetromino in grid when it lands
 void placeTetromino(Tetromino& tetromino) {
     SDL_Color color = tetromino.color;
 
@@ -147,7 +145,6 @@ int main() {
             }
         }
 
-        // Move Tetromino down automatically
         if (SDL_GetTicks() - lastDropTime > DROP_SPEED) {
             if (currentTetromino.moveDown(grid)) {
                 lastDropTime = SDL_GetTicks();
