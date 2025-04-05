@@ -6,7 +6,6 @@
 #include <string>
 #include "setting.h"
 
-// Menu function
 bool showMenu(SDL_Renderer* renderer, TTF_Font* font, SDL_Texture* menuTexture) {
     bool inMenu = true;
     SDL_Event event;
