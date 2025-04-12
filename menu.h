@@ -1,204 +1,54 @@
-#define SDL_MAIN_HANDLED
-#include <bits/stdc++.h>
+#ifndef MENU_H_INCLUDED
+#define MENU_H_INCLUDED
+
 #include <SDL.h>
-#include <SDL_mixer.h>
-#include <SDL_image.h>
 #include <SDL_ttf.h>
-#include "grid.h"
-#include "background.h"
-#include "music_background.h"
-#include "tetromino.h"
-#include "system.h"
-#include "menu.h"
+#include <string>
+#include "setting.h"
 
-using namespace std;
-void drawPlacedBlocks(SDL_Renderer* renderer) {
-    for (int i = 0; i < GRID_HEIGHT; i++) {
-        for (int j = 0; j < GRID_WIDTH; j++) {
-            if (grid[i][j]) {
-                SDL_SetRenderDrawColor(renderer, gridColors[i][j].r, gridColors[i][j].g, gridColors[i][j].b, 255);
-                SDL_Rect block = { j * BLOCK_SIZE + 250, i * BLOCK_SIZE + 50, BLOCK_SIZE, BLOCK_SIZE };
-                SDL_RenderFillRect(renderer, &block);
-            }
-        }
-    }
-}
-
-void placeTetromino(Tetromino& tetromino) {
-    SDL_Color color = tetromino.color;
-
-    for (int i = 0; i < tetromino.shape.size(); i++) {
-        for (int j = 0; j < tetromino.shape[i].size(); j++) {
-            if (tetromino.shape[i][j]) {
-                if (tetromino.y + i>=GRID_HEIGHT||tetromino.x + j>=GRID_WIDTH||grid[tetromino.y + i][tetromino.x + j]){
-                    running=false;
-                    return;
-                }
-                grid[tetromino.y + i][tetromino.x + j] = true;
-                gridColors[tetromino.y + i][tetromino.x + j] = color;
-            }
-        }
-    }
-}
-
-// Remove full lines and shift down
-void clearFullLines() {
-    for (int i = GRID_HEIGHT - 1; i >= 0; i--) {
-        bool full = true;
-        for (int j = 0; j < GRID_WIDTH; j++) {
-            if (!grid[i][j]) {
-                full = false;
-                break;
-            }
-        }
-
-        if (full) {
-            scorre+=100;
-            maxscore=max(maxscore,scorre);
-
-            for (int k = i; k > 0; k--) {
-                for (int j = 0; j < GRID_WIDTH; j++) {
-                    grid[k][j] = grid[k - 1][j];
-                    gridColors[k][j] = gridColors[k - 1][j];
-                }
-            }
-
-            for (int j = 0; j < GRID_WIDTH; j++) {
-                grid[0][j] = false;
-                gridColors[0][j] = {255,255,255, 255}; // white
-            }
-
-            i++;
-        }
-    }
-}
-void initSDL(SDL_Window*& window, SDL_Renderer*& renderer,TTF_Font* &font) {
-    SDL_Init(SDL_INIT_VIDEO);
-    IMG_Init(IMG_INIT_PNG);
-    TTF_Init();
-    font = TTF_OpenFont("arial.ttf", 24);
-    SDL_Color white = {255, 255, 255};
-    window = SDL_CreateWindow("Tetris", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-}
-void renderNextTetromino(SDL_Renderer* renderer, Tetromino nextTetromino) {
-    int previewX = SCREEN_WIDTH - 200;
-    int previewY = 100;
-
-    for (int i = 0; i < nextTetromino.shape.size(); i++) {
-        for (int j = 0; j < nextTetromino.shape[i].size(); j++) {
-            if (nextTetromino.shape[i][j]) {
-                SDL_Color color = nextTetromino.color;
-                SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, 255);
-
-                SDL_Rect block = {previewX + j * BLOCK_SIZE, previewY + i * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE};
-                SDL_RenderFillRect(renderer, &block);
-            }
-        }
-    }
-}
-
-int main() {
-    SDL_Window* window = nullptr;
-    SDL_Renderer* renderer = nullptr;
-    TTF_Font* font= nullptr;
-    initSDL(window, renderer,font);
-    playBackgroundMusic("background.mp3");
-
-    SDL_Texture* menuTexture = loadBackground(renderer, "background.jpg");
-    if (!menuTexture) {
-        cout << "Failed to load menu image!" << endl;
-        return 1;
-    }
-    if (!showMenu(renderer, font,menuTexture)) {
-        return 0;
-    }
-    SDL_DestroyTexture(menuTexture);
-    SDL_Texture* bgTexture = loadBackground(renderer, "background.jpg");
-    Tetromino currentTetromino(rng() % 7);
-    Tetromino nextTetromino(rng() % 7);
+bool showMenu(SDL_Renderer* renderer, TTF_Font* font, SDL_Texture* menuTexture) {
+    bool inMenu = true;
     SDL_Event event;
-    Uint32 lastDropTime = SDL_GetTicks();
 
-    while (running) {
+    // Define buttons
+    Button startButton = {{300, 300, 200, 50}, {0, 128, 255, 255}, "Start"};
+    Button settingsButton = {{300, 400, 200, 50}, {128, 128, 128, 255}, "Settings"};
+
+    while (inMenu) {
+        SDL_RenderCopy(renderer, menuTexture, NULL, NULL);
+
+        TTF_Font* fontt = TTF_OpenFont("Arial Bold.ttf", 72);//Make logo bigger
+        SDL_Color yellow = {255, 255, 0}; // Yellow
+        SDL_Surface* logoSurface = TTF_RenderText_Solid(fontt, "TETRIS", yellow);
+        SDL_Texture* logoTexture = SDL_CreateTextureFromSurface(renderer, logoSurface);
+        SDL_Rect logoRect = {270, 200, logoSurface->w, logoSurface->h};
+
+        SDL_RenderCopy(renderer, logoTexture, NULL, &logoRect);
+        SDL_FreeSurface(logoSurface);
+        SDL_DestroyTexture(logoTexture);
+
+        renderButton(renderer, font, startButton);
+        renderButton(renderer, font, settingsButton);
+
+        SDL_RenderPresent(renderer);
+
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
-                running = false;
-            } else if (event.type == SDL_KEYDOWN) {
-                switch (event.key.keysym.sym) {
-                    case SDLK_LEFT:
-                        currentTetromino.moveLeft(grid);
-                        break;
-                    case SDLK_RIGHT:
-                        currentTetromino.moveRight(grid);
-                        break;
-                    case SDLK_DOWN:
-                        currentTetromino.moveDown(grid);
-                        break;
-                    case SDLK_UP:
-                        currentTetromino.rotate(grid);
-                        break;
+                return false;
+            }
+            else if (event.type == SDL_MOUSEBUTTONDOWN) {
+                int x, y;
+                SDL_GetMouseState(&x, &y);
+                if (isButtonClicked(startButton, x, y)) {
+                    inMenu = false; // Start game
+                }
+                if (isButtonClicked(settingsButton, x, y)) {
+                    showSettings(renderer,font);
                 }
             }
-            else if (event.key.keysym.sym == SDLK_r) {
-            restartGame(currentTetromino, scorre);
-            }
         }
-
-        if (SDL_GetTicks() - lastDropTime > DROP_SPEED) {
-            if (currentTetromino.moveDown(grid)) {
-                lastDropTime = SDL_GetTicks();
-            } else {
-                placeTetromino(currentTetromino);
-                if (!running){//game over
-                renderGameover(renderer,font);
-                SDL_RenderPresent(renderer);
-                SDL_Delay(1000);
-                bool waiting=true;
-                while (waiting){//wait for the player want to play again or not
-                    while (SDL_PollEvent(&event)){
-                    if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_r) {
-                    restartGame(currentTetromino, scorre);
-                    waiting = false;
-                    }
-                    else if (event.type == SDL_QUIT) {
-                    return 0;
-                    }
-                    }
-                }
-                }
-                clearFullLines();
-                currentTetromino = nextTetromino;
-                nextTetromino = Tetromino(rng() % 7);
-            }
-        }
-        if (scorre>=10000){ //checking win game
-        renderScore(renderer, font, scorre);
-        renderMaxScore(renderer,font,maxscore);
-        renderWin(renderer,font);
-        SDL_RenderPresent(renderer);
-        SDL_Delay(3000);
-        break;
-        }
-        //render everything
-        SDL_RenderClear(renderer);
-        renderBackground(renderer, bgTexture);
-        drawGrid(renderer, 250, 50);
-        drawPlacedBlocks(renderer);
-        drawTetromino(renderer, currentTetromino);
-        renderScore(renderer, font, scorre);
-        renderMaxScore(renderer, font, maxscore);
-        renderNextTetromino(renderer, nextTetromino);
-        SDL_RenderPresent(renderer);
     }
-    //clear
-    stopMusic();
-    SDL_DestroyTexture(bgTexture);
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    IMG_Quit();
-    SDL_Quit();
-    TTF_CloseFont(font);
-    TTF_Quit();
-    return 0;
+    return true;
 }
+
+#endif // MENU_H_INCLUDED
