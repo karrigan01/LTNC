@@ -4,7 +4,6 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 int DROP_SPEED = 500; // milliseconds
-// Button structure
 struct Button {
     SDL_Rect rect;
     SDL_Color color;
@@ -55,11 +54,15 @@ void showSettings(SDL_Renderer* renderer, TTF_Font* font) {
     Button easyButton = {{150, 350, 180, 70}, {0, 255, 0, 255}, "Easy"};
     Button mediumButton = {{320, 350, 180, 70}, {255, 165, 0, 255}, "Medium"};
     Button hardButton = {{490, 350, 180, 70}, {255, 0, 0, 255}, "Hard"};
-
+    SDL_Texture* settingTexture=loadBackground(renderer,"background.jpg");
+    if (!settingTexture) {
+    cout << "Failed to load setting image!" << endl;
+    return ;
+    }
     while (inSettings) {
         SDL_SetRenderDrawColor(renderer, 50, 50, 50, 255);
         SDL_RenderClear(renderer);
-
+        SDL_RenderCopy(renderer, settingTexture, NULL, NULL);
         SDL_Color white = {255, 255, 255};
         SDL_Surface* surface = TTF_RenderText_Solid(font, "Press ESC to return", white);
         SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
@@ -96,6 +99,7 @@ void showSettings(SDL_Renderer* renderer, TTF_Font* font) {
             }
         }
     }
+    SDL_DestroyTexture(settingTexture);
 }
 
 #endif // SETTING_H_INCLUDED
